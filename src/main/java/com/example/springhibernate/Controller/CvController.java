@@ -1,5 +1,6 @@
 package com.example.springhibernate.Controller;
 
+import com.example.springhibernate.Exceptions.RequestException;
 import com.example.springhibernate.Models.Cv;
 import com.example.springhibernate.Services.CvService;
 import org.springframework.http.HttpStatus;
@@ -18,23 +19,28 @@ public class CvController {
         this.resumeSevice = resumeSevice;
     }
 
-    @GetMapping("/")
-    public ResponseEntity<List<Cv>> list()  {
-        return ResponseEntity.ok().body(resumeSevice.findAllResumes());
+    @GetMapping("findAll")
+    public ResponseEntity<List<Cv>> findAll()  {
+        return ResponseEntity.ok().body(resumeSevice.findAll());
     }
-    @DeleteMapping("/delete/{id}")
-    public String delete(@PathVariable Long id)  {
-        return resumeSevice.deleteResume(id);
+    @DeleteMapping("delete/{id}")
+    public ResponseEntity<HttpStatus> delete(@PathVariable Long id)  {
+        if(resumeSevice.findById(id)==null){
+            throw new RequestException("L id ne se trouve pas",HttpStatus.NOT_FOUND);
+        }
+         resumeSevice.delete(id);
+        return ResponseEntity.ok(HttpStatus.OK);
+
     }
 
-    @PostMapping("/create")
+    @PostMapping("create")
     public ResponseEntity<String> create(@RequestBody Cv resume) {
-        resumeSevice.saveResume(resume);
+        resumeSevice.save(resume);
         return ResponseEntity.status(HttpStatus.CREATED).body("Resume added successfully.");
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("update/{id}")
     public ResponseEntity<Cv> updateResume(@RequestBody Cv resume) {
-        return ResponseEntity.ok().body(resumeSevice.updateResume(resume));
+        return ResponseEntity.ok().body(resumeSevice.update(resume));
     }
 }
